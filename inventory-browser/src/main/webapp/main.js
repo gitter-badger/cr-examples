@@ -248,7 +248,17 @@ $(document).ready(function () {
     $("#cancelTenantAssignment").click(function() {
         hideTenantAssignment();
     });
+    function initTenantsDropdown() {
+        $.get( "im/1/rest/tenants", function(data) {
+            $($.parseXML(data)).find("tenant").each(function(i,el) {
+                var opt = $("<option/>").text($(el).find("name").text());
+                $(opt).attr("value",$(el).find("id"));
+                $("#tenantDropdown").append(opt);
+            });
+        });
+    }
 
     refreshTable();
+    initTenantsDropdown();
 
 });
