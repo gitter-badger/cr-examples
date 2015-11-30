@@ -59,6 +59,9 @@
                         <span class="glyphicon glyphicon-refresh" style="margin-right: 10px"></span>Refresh
                     </button>
                     <span style="margin-left: 20px; font-size: small"><input type="checkbox" id="autoRefresh" style="margin-right: 10px">Auto refresh</span>
+                    <button id="assignToTenant" type="button" class="btn btn-default" aria-label="Assign to tenant" style="margin-left: 20px">
+                        <span class="glyphicon glyphicon-check" style="margin-right: 10px"></span>Assign to tenant
+                    </button>
                 </h3>
                 <table class="table table-striped" id="table">
                     <thead>
@@ -84,6 +87,21 @@
                         <tbody id="detailsTableBody"></tbody>
                     </table>
                 </div>
+            </div>
+            <div class="col-md-6" id="tenantAssignment">
+                <h3>Assign selected things to tenant</h3>
+                <form>
+                    <div class="form-group">
+                        <label for="tenantDropdown">Tenants</label>
+                        <select class="form-control" id="tenantDropdown">
+                            <option>foo</option>
+                            <option>bar</option>
+                            <option>baz</option>
+                        </select>
+                    </div>
+                    <button id="doAssignThingsToTenant" type="button" class="btn btn-primary">Assign</button>
+                    <button id="cancelTenantAssignment" type="button" class="btn btn-secondary">Cancel</button>
+                </form>
             </div>
         </div>
 

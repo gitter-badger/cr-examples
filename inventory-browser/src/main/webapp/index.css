@@ -10,6 +10,9 @@
 #detailsThingId {
     word-wrap: break-word;
 }
+#tenantAssignment {
+    display: none;
+}
 td {
     word-break: break-all;
     word-wrap: break-word;

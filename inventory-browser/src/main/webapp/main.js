@@ -74,13 +74,31 @@ $(document).ready(function () {
                 });
             }
 
-            $("#table-wrapper").removeClass("col-md-12").addClass("col-md-6");
-            $("#details").show();
+            showThingDetails();
         }).fail(function () {
-            $("#table-wrapper").removeClass("col-md-6").addClass("col-md-12");
-            $("#details").hide();
+            hideThingDetails();
         });
     };
+
+    // --- thing details and tenant assignment panels show/hide handlers
+    function showThingDetails() {
+        hideTenantAssignment();
+        $("#table-wrapper").removeClass("col-md-12").addClass("col-md-6");
+        $("#details").show();
+    }
+    function hideThingDetails() {
+        $("#table-wrapper").removeClass("col-md-6").addClass("col-md-12");
+        $("#details").hide();
+    }
+    function showTenantAssignment() {
+        hideThingDetails();
+        $("#table-wrapper").removeClass("col-md-12").addClass("col-md-6");
+        $("#tenantAssignment").show();
+    }
+    function hideTenantAssignment() {
+        $("#table-wrapper").removeClass("col-md-6").addClass("col-md-12");
+        $("#tenantAssignment").hide();
+    }
 
     // --- Handler for refreshing list and map of things
     var refreshTable = function () {
@@ -103,16 +121,19 @@ $(document).ready(function () {
                 var t = data.items[i];
                 var currentlySelected = (t.thingId == $("#details").attr("thingId"));
 
-                // --- add heading data to table
+                // --- thing id column
                 var row = $("<tr>");
                 row.attr("thingId", t.thingId);
                 row.append($("<td>").text(t.thingId));
 
-                //if ("attributes" in t && "name" in t.attributes) {
-                //    row.append($("<td>").text(t.attributes.name));
-                //} else {
-                //    row.append($("<td>").text("-"));
-                //}
+                // --- checkbox column
+                var checkbox = $("<input class='thingCheckbox' type='checkbox' />");
+                checkbox.attr("value", t.thingId);
+                checkbox.click(function(e) {
+                    e.stopPropagation();
+                });
+                row.append($("<td>").append(checkbox));
+
                 $("#tableBody").append(row);
 
                 // --- when thing has a "geolocation" feature with "geoposition" properties
@@ -213,6 +234,19 @@ $(document).ready(function () {
         // --- refresh thing details
         $("#details").attr("thingId", thingId);
         refreshDetails();
+    });
+
+    // --- tenant assignment panel related stuff
+    $("#assignToTenant").click(function() {
+        showTenantAssignment();
+    });
+    $("#doAssignThingsToTenant").click(function() {
+        $(".thingCheckbox:checked").each(function(i,el) {
+            console.log($(el).attr("value"));
+        });
+    });
+    $("#cancelTenantAssignment").click(function() {
+        hideTenantAssignment();
     });
 
     refreshTable();
