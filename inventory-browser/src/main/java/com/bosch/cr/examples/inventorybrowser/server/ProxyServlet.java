@@ -25,6 +25,7 @@
 package com.bosch.cr.examples.inventorybrowser.server;
 
 import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,10 +35,12 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.ssl.SSLContextBuilder;
 
@@ -104,7 +107,20 @@ public class ProxyServlet extends HttpServlet {
             CloseableHttpClient c = getHttpClient();
 
             String targetUrl = URL_PREFIX + req.getPathInfo() + (req.getQueryString() != null ? ("?" + req.getQueryString()) : "");
-            BasicHttpRequest targetReq = new BasicHttpRequest(req.getMethod(), targetUrl);
+
+            HttpRequest targetReq;
+            if("POST".equals(req.getMethod()) || "PUT".equals(req.getMethod())) {
+                targetReq = new BasicHttpEntityEnclosingRequest(req.getMethod(), targetUrl);
+                BasicHttpEntity body = new BasicHttpEntity();
+                body.setContentLength(req.getContentLength());
+                body.setContent(req.getInputStream());
+                ((BasicHttpEntityEnclosingRequest)targetReq).setEntity(body);
+                if(req.getHeader("Content-Type") != null) {
+                    targetReq.addHeader("Content-Type", req.getHeader("Content-Type"));
+                }
+            } else {
+                targetReq = new BasicHttpRequest(req.getMethod(), targetUrl);
+            }
 
             String user = "";
             if (auth.toUpperCase().startsWith("BASIC ")) {
@@ -123,7 +139,9 @@ public class ProxyServlet extends HttpServlet {
                     + " -> " + (System.currentTimeMillis() - time) + " msec: " + targetResp.getStatusLine());
 
             resp.setStatus(targetResp.getStatusLine().getStatusCode());
-            targetResp.getEntity().writeTo(resp.getOutputStream());
+            if(targetResp.getEntity() != null) {
+                targetResp.getEntity().writeTo(resp.getOutputStream());
+            }
 
         } catch (IOException | AuthenticationException ex) {
             throw new RuntimeException(ex);

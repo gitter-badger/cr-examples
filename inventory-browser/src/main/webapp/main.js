@@ -240,23 +240,95 @@ $(document).ready(function () {
     $("#assignToTenant").click(function() {
         showTenantAssignment();
     });
-    $("#doAssignThingsToTenant").click(function() {
-        $(".thingCheckbox:checked").each(function(i,el) {
-            console.log($(el).attr("value"));
-        });
-    });
-    $("#cancelTenantAssignment").click(function() {
-        hideTenantAssignment();
-    });
     function initTenantsDropdown() {
         $.get( "im/1/rest/tenants", function(data) {
-            $($.parseXML(data)).find("tenant").each(function(i,el) {
-                var opt = $("<option/>").text($(el).find("name").text());
-                $(opt).attr("value",$(el).find("id"));
+            $($.parseXML(data)).find("ns3\\:tenant, tenant").each(function(i,el) {
+                var opt = $("<option/>").text($(el).find("ns3\\:name, name").text());
+                $(opt).attr("value",$(el).find("ns3\\:id, id").text());
                 $("#tenantDropdown").append(opt);
             });
         });
     }
+    $("#doAssignThingsToTenant").click(function() {
+        var checkedThings = $(".thingCheckbox:checked");
+        if(checkedThings.length === 0) {
+            return;
+        }
+
+        var tenantId = $("#tenantDropdown > option:selected").attr("value");
+        $.get("im/1/rest/roles?query=and(name(\"Thing Manager\"),relationToTenant(id(\"" + tenantId + "\")))")
+           .then(function extractRoleIdFromFeed(rawFeed) {
+               var d = $.Deferred();
+
+               var feed = $($.parseXML(rawFeed));
+               if(feed.find("ns3\\:totalEntries, totalEntries").text() !== "1") {
+                   d.reject("Role 'Thing Manager' not found");
+               }
+               else {
+                   d.resolve(feed.find("ns3\\:role, role").first().find("ns3\\:id, id").text());
+               }
+
+               return d.promise();
+           })
+           .then(function collectCheckedThingIds(roleId) {
+               var d = $.Deferred();
+
+               var thingIds = [];
+               $(".thingCheckbox:checked").each(function(i,el) {
+                   thingIds.push($(el).attr("value"));
+               });
+               d.resolve({
+                   roleId: roleId,
+                   thingIds: thingIds
+               });
+
+               return d.promise();
+           })
+           .then(function addRoleToThingAcls(result) {
+               var d = $.Deferred();
+
+                for(var i = 0; i < result.thingIds.length; i++) {
+                    $.ajax({
+                        method: "PUT",
+                        url: "cr/1/things/" + result.thingIds[i] + "/acl/" + result.roleId,
+                        headers: {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json; charset=utf-8"
+                        },
+                        data: JSON.stringify({
+                            READ: true,
+                            WRITE: true,
+                            ADMINISTRATE: true
+                        })
+                    })
+                   .done(function() {
+                       if(i === result.thingIds.length) {
+                           d.resolve();
+                       }
+                   })
+                   .fail(function() {
+                       d.reject("Failed to add role to thing's ACL");
+                   });
+                }
+
+               return d.promise();
+           })
+           .done(function() {
+               console.log("Successfully assigned the selected things to tenant '" + tenantId + "'.");
+           })
+           .fail(function(reason) {
+               console.log("Assignment of the selected things to tenant '" + tenantId + "' failed: " + reason);
+           })
+           .always(function() {
+               $(".thingCheckbox:checked").each(function(i,el) {
+                   $(el).prop( "checked", false );
+               });
+               hideTenantAssignment();
+           });
+    });
+    $("#cancelTenantAssignment").click(function() {
+        hideTenantAssignment();
+    });
 
     refreshTable();
     initTenantsDropdown();
