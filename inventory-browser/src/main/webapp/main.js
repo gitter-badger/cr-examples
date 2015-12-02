@@ -241,6 +241,9 @@ $(document).ready(function () {
         showTenantAssignment();
     });
     function initTenantsDropdown() {
+        if($("#tenantDropdown > option").length > 0) {
+            return;
+        }
         $.get( "im/1/rest/tenants", function(data) {
             $($.parseXML(data)).find("ns3\\:tenant, tenant").each(function(i,el) {
                 var opt = $("<option/>").text($(el).find("ns3\\:name, name").text());
@@ -330,7 +333,7 @@ $(document).ready(function () {
         hideTenantAssignment();
     });
 
-    refreshTable();
     initTenantsDropdown();
+    refreshTable();
 
 });

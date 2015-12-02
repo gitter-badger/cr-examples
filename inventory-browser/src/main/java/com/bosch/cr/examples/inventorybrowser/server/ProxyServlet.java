@@ -97,7 +97,7 @@ public class ProxyServlet extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String auth = req.getHeader("Authorization");
         if (auth == null) {
-            resp.setHeader("WWW-Authenticate", "BASIC realm=\"Proxy for CR\"");
+            resp.setHeader("WWW-Authenticate", "BASIC realm=\"Proxy\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
