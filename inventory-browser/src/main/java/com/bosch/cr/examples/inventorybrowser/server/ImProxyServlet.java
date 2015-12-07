@@ -122,6 +122,7 @@ public class ImProxyServlet extends HttpServlet {
                     + " -> " + (System.currentTimeMillis() - time) + " msec: " + targetResp.getStatusLine());
 
             resp.setStatus(targetResp.getStatusLine().getStatusCode());
+            resp.setContentType("text/xml; charset=utf-8");
             targetResp.getEntity().writeTo(resp.getOutputStream());
 
         } catch (IOException | AuthenticationException ex) {

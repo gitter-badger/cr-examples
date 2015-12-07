@@ -245,7 +245,7 @@ $(document).ready(function () {
             return;
         }
         $.get( "im/1/rest/tenants", function(data) {
-            $($.parseXML(data)).find("ns3\\:tenant, tenant").each(function(i,el) {
+            $(data).find("ns3\\:tenant, tenant").each(function(i,el) {
                 var opt = $("<option/>").text($(el).find("ns3\\:name, name").text());
                 $(opt).attr("value",$(el).find("ns3\\:id, id").text());
                 $("#tenantDropdown").append(opt);
@@ -263,7 +263,7 @@ $(document).ready(function () {
            .then(function extractRoleIdFromFeed(rawFeed) {
                var d = $.Deferred();
 
-               var feed = $($.parseXML(rawFeed));
+               var feed = $(rawFeed);
                if(feed.find("ns3\\:totalEntries, totalEntries").text() !== "1") {
                    d.reject("Role 'Thing Manager' not found");
                }
