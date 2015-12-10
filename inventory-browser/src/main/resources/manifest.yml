@@ -22,10 +22,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
 applications:
-- name: inventory-browser
+- name: inventory-browser-im
   memory: 1024M
   disk_quota: 256M
   buildpack: https://github.com/cloudfoundry/java-buildpack.git
   domain: internal.bosch-iot-cloud.com
-  host: inventory-browser
+  host: inventory-browser-im
   path: inventory-browser-${project.version}
