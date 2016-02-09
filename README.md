@@ -49,6 +49,6 @@ To deploy the application to Cloud Foundry, we use staticfile as buildpack. Exec
 
 ## License
 
-The examples are made available under the terms of BSD 3-Clause License. See individual files for details.
+The examples are made available under the terms of Bosch SI Example Code License. See individual files for details.
 
 As an exception the file "iframeResizer.contentWindow.min.js" is made available under the terms of the MIT License.
